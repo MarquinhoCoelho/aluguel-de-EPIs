@@ -1,0 +1,69 @@
+######## COLABORADORES
+###
+
+GET http://localhost:3333/colaboradores
+
+###
+
+GET http://localhost:3333/colaborador/ORELHA 2
+
+###
+
+POST http://localhost:3333/colaborador
+Content-Type: application/json
+
+{
+    "nome": "ORELHA",
+    "senha": "12345"
+}
+
+###
+
+PUT http://localhost:3333/colaborador/6dad6cb9-cc36-4dad-9e15-cdfa306bbd21
+Content-Type: application/json
+
+{
+    "nome": "Hitman",
+    "senha": "123"
+}
+
+###
+
+DELETE http://localhost:3333/colaborador/ffb2f0c2-11cd-4b92-97e4-aed97dad993e
+
+###
+
+######## EPIS
+###
+
+GET http://localhost:3333/epis
+
+###
+
+POST http://localhost:3333/epi
+Content-Type: application/json
+
+{
+    "nome": "Luva",
+    "descricao": "descricao",
+    "tipo": "Proteção",
+    "emprestado": true,
+    "colaborador_que_pegou_emprestado": "miguel"
+}
+
+###
+
+PUT http://localhost:3333/epi/456d1e5e-347d-4c91-98ae-4e4d487a4531
+Content-Type: application/json
+
+{
+    "nome": "LUVA",
+    "descricao": "ROUPA de segurança atualizado",
+    "tipo": "Proteção",
+    "emprestado": true,
+    "colaborador_que_pegou_emprestado": "Marcos"
+}
+
+###
+
+DELETE http://localhost:3333/epi/{id}

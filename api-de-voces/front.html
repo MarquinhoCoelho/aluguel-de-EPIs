@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Colaboradores e EPIs</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+    <h1>Gerenciamento de Colaboradores</h1>
+    <h2>Cadastrar Colaborador</h2>
+    <input type="text" id="colaboradorNome" placeholder="Nome">
+    <input type="text" id="colaboradorSenha" placeholder="Senha">
+    <button onclick="criarColaborador()">Cadastrar</button>
+
+    <h2>Lista de Colaboradores</h2>
+    <table id="tabelaColaboradores">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Senha</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h1>Gerenciamento de EPIs</h1>
+    <h2>Cadastrar EPI</h2>
+    <input type="text" id="epiNome" placeholder="Nome">
+    <input type="text" id="epiDescricao" placeholder="Descrição">
+    <input type="text" id="epiTipo" placeholder="Tipo">
+    <select id="epiEmprestado">
+        <option value="false">Não emprestado</option>
+        <option value="true">Emprestado</option>
+    </select>
+    <input type="text" id="epiColaborador" placeholder="Colaborador que pegou">
+    <button onclick="criarEpi()">Cadastrar</button>
+
+    <h2>Lista de EPIs</h2>
+    <table id="tabelaEpis">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Tipo</th>
+                <th>Emprestado</th>
+                <th>Colaborador</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        let colaboradorIdEdicao = null;
+        let epiIdEdicao = null;
+
+        async function listarColaboradores() {
+            try {
+                const resposta = await fetch('http://localhost:3333/colaboradores');
+                const colaboradores = await resposta.json();
+                const tbody = document.getElementById('tabelaColaboradores').querySelector('tbody');
+                tbody.innerHTML = '';
+                colaboradores.forEach(colaborador => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${colaborador.id}</td>
+                        <td>${colaborador.nome}</td>
+                        <td>${colaborador.senha}</td>
+                        <td>
+                            <button onclick="prepararEdicaoColaborador('${colaborador.id}', '${colaborador.nome}', '${colaborador.senha}')">Editar</button>
+                            <button onclick="deletarColaborador('${colaborador.id}')">Deletar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Erro ao listar colaboradores:', error);
+            }
+        }
+
+        async function criarColaborador() {
+            const colaborador = {
+                nome: document.getElementById('colaboradorNome').value,
+                senha: document.getElementById('colaboradorSenha').value,
+            };
+            try {
+                if (colaboradorIdEdicao) {
+                    await fetch(`http://localhost:3333/colaborador/${colaboradorIdEdicao}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(colaborador)
+                    });
+                    colaboradorIdEdicao = null; // Limpar ID de edição
+                } else {
+                    await fetch('http://localhost:3333/colaborador', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(colaborador)
+                    });
+                }
+                listarColaboradores();
+                limparCamposColaborador();
+            } catch (error) {
+                console.error('Erro ao criar colaborador:', error);
+            }
+        }
+
+        function prepararEdicaoColaborador(id, nome, senha) {
+            colaboradorIdEdicao = id;
+            document.getElementById('colaboradorNome').value = nome;
+            document.getElementById('colaboradorSenha').value = senha;
+        }
+
+        async function deletarColaborador(id) {
+            if (confirm('Você tem certeza que deseja deletar este colaborador?')) {
+                try {
+                    await fetch(`http://localhost:3333/colaborador/${id}`, { method: 'DELETE' });
+                    listarColaboradores();
+                } catch (error) {
+                    console.error('Erro ao deletar colaborador:', error);
+                }
+            }
+        }
+
+        async function listarEpis() {
+            try {
+                const resposta = await fetch('http://localhost:3333/epis');
+                const epis = await resposta.json();
+                const tbody = document.getElementById('tabelaEpis').querySelector('tbody');
+                tbody.innerHTML = '';
+                epis.forEach(epi => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${epi.id}</td>
+                        <td>${epi.nome}</td>
+                        <td>${epi.descricao}</td>
+                        <td>${epi.tipo}</td>
+                        <td>${epi.emprestado ? 'Sim' : 'Não'}</td>
+                        <td>${epi.colaboradorquepegouemprestado || '-'}</td>
+                        <td>
+                            <button onclick="prepararEdicaoEpi('${epi.id}', '${epi.nome}', '${epi.descricao}', '${epi.tipo}', ${epi.emprestado}, '${epi.colaboradorquepegouemprestado || ''}')">Editar</button>
+                            <button onclick="deletarEpi('${epi.id}')">Deletar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Erro ao listar EPIs:', error);
+            }
+        }
+
+        async function criarEpi() {
+            const epi = {
+                nome: document.getElementById('epiNome').value,
+                descricao: document.getElementById('epiDescricao').value,
+                tipo: document.getElementById('epiTipo').value,
+                emprestado: true,
+                colaboradorquepegouemprestado: document.getElementById('epiColaborador').value
+            };
+            try {
+                if (epiIdEdicao) {
+                    await fetch(`http://localhost:3333/epi/${epiIdEdicao}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(epi)
+                    });
+                    epiIdEdicao = null; // Limpar ID de edição
+                } else {
+                    await fetch('http://localhost:3333/epi', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(epi)
+                    });
+                }
+                listarEpis();
+                limparCamposEpi();
+            } catch (error) {
+                console.error('Erro ao criar EPI:', error);
+            }
+        }
+
+        function prepararEdicaoEpi(id, nome, descricao, tipo, emprestado, colaborador) {
+            epiIdEdicao = id;
+            document.getElementById('epiNome').value = nome;
+            document.getElementById('epiDescricao').value = descricao;
+            document.getElementById('epiTipo').value = tipo;
+            document.getElementById('epiEmprestado').value = emprestado.toString();
+            document.getElementById('epiColaborador').value = colaborador;
+        }
+
+        async function deletarEpi(id) {
+            if (confirm('Você tem certeza que deseja deletar este EPI?')) {
+                try {
+                    await fetch(`http://localhost:3333/epi/${id}`, { method: 'DELETE' });
+                    listarEpis();
+                } catch (error) {
+                    console.error('Erro ao deletar EPI:', error);
+                }
+            }
+        }
+
+        function limparCamposColaborador() {
+            document.getElementById('colaboradorNome').value = '';
+            document.getElementById('colaboradorSenha').value = '';
+        }
+
+        function limparCamposEpi() {
+            document.getElementById('epiNome').value = '';
+            document.getElementById('epiDescricao').value = '';
+            document.getElementById('epiTipo').value = '';
+            document.getElementById('epiEmprestado').value = 'false';
+            document.getElementById('epiColaborador').value = '';
+        }
+
+        // Listar colaboradores e EPIs ao carregar a página
+        window.onload = function() {
+            listarColaboradores();
+            listarEpis();
+        }
+    </script>
+</body>
+</html>
