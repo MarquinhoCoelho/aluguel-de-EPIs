@@ -1,0 +1,67 @@
+######## COLABORADORES
+###
+
+GET http://localhost:3333/colaboradores
+
+###
+
+GET http://localhost:3333/colaborador/ORELHA 2
+
+###
+
+POST http://localhost:3333/colaborador
+Content-Type: application/json
+
+{
+    "nome": "ORELHA 2",
+    "senha": "12345"
+}
+
+###
+
+PUT http://localhost:3333/colaborador/{id}
+Content-Type: application/json
+
+{
+    "nome": "ORELHA2",
+    "senha": "12345"
+}
+
+###
+
+DELETE http://localhost:3333/colaborador/{id}
+
+###
+
+######## EPIS
+###
+
+GET http://localhost:3333/epis
+
+###
+
+POST http://localhost:3333/epi
+Content-Type: application/json
+
+{
+    "nome": "Capacete",
+    "descricao": "Capacete de segurança",
+    "tipo": "Proteção"
+}
+
+###
+
+PUT http://localhost:3333/epi/{id}
+Content-Type: application/json
+
+{
+    "nome": "Capacete Atualizado",
+    "descricao": "Capacete de segurança atualizado",
+    "tipo": "Proteção",
+    "emprestado": true,
+    "colaboradorQuePegouEmprestado": "Marcos"
+}
+
+###
+
+DELETE http://localhost:3333/epi/{id}
